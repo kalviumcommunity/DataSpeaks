@@ -9,9 +9,11 @@ import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
 import { GoogleGenerativeAIEmbeddings, ChatGoogleGenerativeAI } from '@langchain/google-genai';
 import { MemoryVectorStore } from 'langchain/vectorstores/memory';
 import { RetrievalQAChain } from 'langchain/chains';
+import mongoRoutes from './routes/mongoRoutes.js';
+import sqlRoutes from './routes/sqlRoutes.js';
 
-// Load environment from parent directory
-config({ path: '../.env' });
+// Load environment variables
+config();
 
 console.log('🔑 API Key loaded:', process.env.GEMINI_API_KEY ? 'Yes' : 'No');
 
@@ -26,6 +28,12 @@ const upload = multer({ dest: UPLOAD_DIR });
 
 // In-memory vector stores
 const vectorStores = {};
+
+// MongoDB routes
+app.use('/api/mongo', mongoRoutes);
+
+// SQL routes
+app.use('/api/sql', sqlRoutes);
 
 // Upload endpoint
 app.post('/api/upload', upload.single('file'), async (req, res) => {
