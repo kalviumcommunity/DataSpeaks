@@ -1,0 +1,26 @@
+🔑 API Key loaded: Yes
+🚀 Server running at http://localhost:3000
+📡 SQL connection request received
+🔗 Attempting to connect to SQL database...
+🔌 SQLService: Starting connection...
+❌ SQLService: Connection failed: Access denied for user 'root'@'localhost' (using password: YES)
+🔌 SQL Connection result: {
+  success: false,
+  message: "Access denied for user 'root'@'localhost' (using password: YES)"
+}
+❌ SQL Connection failed: Access denied for user 'root'@'localhost' (using password: YES)
+📡 SQL connection request received
+🔗 Attempting to connect to SQL database...
+🔌 SQLService: Starting connection...
+❌ SQLService: Connection failed: Access denied for user 'root'@'localhost' (using password: YES)
+🔌 SQL Connection result: {
+  success: false,
+  message: "Access denied for user 'root'@'localhost' (using password: YES)"
+}
+❌ SQL Connection failed: Access denied for user 'root'@'localhost' (using password: YES)
+📡 SQL connection request received
+🔗 Attempting to connect to SQL database...
+🔌 SQLService: Starting connection...
+❌ SQLService: Connection failed: Invalid URL
+🔌 SQL Connection result: { success: false, message: 'Invalid URL' }
+❌ SQL Connection failed: Invalid URL
