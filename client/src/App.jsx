@@ -18,17 +18,89 @@ function App() {
     localStorage.removeItem('fileId');
   };
 
-  if (mode === 'select') {
+  // Floating Home Button Component
+  const FloatingHomeButton = () => (
+    <button
+      onClick={resetApp}
+      className="fixed top-6 right-6 z-50 p-4 bg-gray-800/70 backdrop-blur-md hover:bg-gray-700/80 
+                 border border-gray-600/50 rounded-full text-gray-300 hover:text-white 
+                 transition-all duration-300 shadow-2xl group"
+      title="Back to Home"
+    >
+      <svg 
+        className="w-6 h-6 group-hover:scale-110 transition-transform" 
+        fill="none" 
+        stroke="currentColor" 
+        viewBox="0 0 24 24"
+      >
+        <path 
+          strokeLinecap="round" 
+          strokeLinejoin="round" 
+          strokeWidth={2} 
+          d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" 
+        />
+      </svg>
+    </button>
+  );
+
+  // Full Screen Background Component
+  const FullScreenBackground = ({ children, mode }) => {
+    const getAnimatedElements = () => {
+      switch(mode) {
+        case 'pdf':
+          return (
+            <>
+              <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+              <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
+              <div className="absolute top-3/4 left-1/2 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '4s'}}></div>
+            </>
+          );
+        case 'mongo':
+          return (
+            <>
+              <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-green-500/10 rounded-full blur-3xl animate-pulse"></div>
+              <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
+              <div className="absolute top-3/4 left-1/2 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '4s'}}></div>
+            </>
+          );
+        case 'sql':
+          return (
+            <>
+              <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
+              <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
+              <div className="absolute top-3/4 left-1/2 w-64 h-64 bg-pink-500/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '4s'}}></div>
+            </>
+          );
+        default: // select mode
+          return (
+            <>
+              <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+              <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
+              <div className="absolute top-3/4 left-1/2 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '4s'}}></div>
+            </>
+          );
+      }
+    };
+
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 relative overflow-hidden">
-        {/* Animated Background Elements */}
-        <div className="absolute inset-0">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
-          <div className="absolute top-3/4 left-1/2 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '4s'}}></div>
+        {/* Full Screen Animated Background Elements */}
+        <div className="absolute inset-0 w-full h-full">
+          {getAnimatedElements()}
         </div>
+        
+        {/* Content */}
+        <div className="relative z-10 w-full h-full">
+          {children}
+        </div>
+      </div>
+    );
+  };
 
-        <div className="relative z-10 min-h-screen flex items-center justify-center p-6">
+  if (mode === 'select') {
+    return (
+      <FullScreenBackground mode="select">
+        <div className="min-h-screen flex items-center justify-center p-6">
           <div className="max-w-5xl mx-auto text-center">
             <div className="mb-12">
               <h1 className="text-6xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-500 to-green-400 bg-clip-text text-transparent">
@@ -123,63 +195,63 @@ function App() {
             </div>
           </div>
         </div>
-      </div>
+      </FullScreenBackground>
     );
   }
 
   if (mode === 'pdf') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 relative overflow-hidden">
-        {/* Header */}
-        <header className="relative z-10 p-6">
-          <nav className="max-w-6xl mx-auto flex justify-between items-center">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-              PDF Document Q&A
-            </h1>
-            <button
-              onClick={resetApp}
-              className="px-4 py-2 bg-gray-800/50 hover:bg-gray-700/50 border border-gray-700/50 
-                         rounded-xl text-gray-300 hover:text-white transition-all duration-200 
-                         backdrop-blur-sm"
-            >
-              ← Back to Home
-            </button>
-          </nav>
-        </header>
-        
-        <main className="relative z-10 flex-1 flex items-center justify-center p-6">
+      <FullScreenBackground mode="pdf">
+        <FloatingHomeButton />
+        <div className="min-h-screen flex items-center justify-center p-6">
           {!uploaded ? (
             <UploadPage onUpload={() => setUploaded(true)} />
           ) : (
             <ChatPage />
           )}
-        </main>
-      </div>
+        </div>
+      </FullScreenBackground>
     );
   }
 
   if (mode === 'mongo') {
     if (!connection) {
-      return <ConnectionPage onConnect={setConnection} />;
+      return (
+        <FullScreenBackground mode="mongo">
+          <FloatingHomeButton />
+          <ConnectionPage onConnect={setConnection} />
+        </FullScreenBackground>
+      );
     } else {
       return (
-        <MongoQueryPage 
-          connection={connection} 
-          onDisconnect={resetApp} 
-        />
+        <FullScreenBackground mode="mongo">
+          <FloatingHomeButton />
+          <MongoQueryPage 
+            connection={connection} 
+            onDisconnect={resetApp} 
+          />
+        </FullScreenBackground>
       );
     }
   }
 
   if (mode === 'sql') {
     if (!connection) {
-      return <SQLConnectionPage onConnect={setConnection} />;
+      return (
+        <FullScreenBackground mode="sql">
+          <FloatingHomeButton />
+          <SQLConnectionPage onConnect={setConnection} />
+        </FullScreenBackground>
+      );
     } else {
       return (
-        <SQLQueryPage 
-          connection={connection} 
-          onDisconnect={resetApp} 
-        />
+        <FullScreenBackground mode="sql">
+          <FloatingHomeButton />
+          <SQLQueryPage 
+            connection={connection} 
+            onDisconnect={resetApp} 
+          />
+        </FullScreenBackground>
       );
     }
   }
