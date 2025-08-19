@@ -1,7 +1,8 @@
 import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
-import { config } from 'dotenv';
+import dotenv from 'dotenv';
 
-config({ path: '../.env' });
+// Load environment variables
+dotenv.config();
 
 class SQLQueryService {
   constructor() {

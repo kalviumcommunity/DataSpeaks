@@ -8,29 +8,15 @@ const SQLConnectionPage = ({ onConnect }) => {
   const [selectedDbType, setSelectedDbType] = useState('mysql');
 
   const dbTypes = [
-    { id: 'mysql', name: 'MySQL', example: 'mysql://username:password@localhost:3306/database' },
-    { id: 'postgresql', name: 'PostgreSQL', example: 'postgresql://username:password@localhost:5432/database' },
-    { id: 'sqlite', name: 'SQLite', example: 'sqlite:///path/to/database.db' },
-    { id: 'mssql', name: 'SQL Server', example: 'mssql://username:password@localhost:1433/database' }
+    { id: 'mysql', name: 'MySQL', example: 'mysql://username:password@localhost:3306/database' }
+   
   ];
 
   const sampleConnections = {
     mysql: [
       'mysql://root:password@localhost:3306/test',
       'mysql://user:pass@192.168.1.100:3306/inventory'
-    ],
-    postgresql: [
-      'postgresql://postgres:password@localhost:5432/mydb',
-      'postgresql://user:pass@localhost:5432/analytics'
-    ],
-    sqlite: [
-      'sqlite:///home/user/database.db',
-      'sqlite:///tmp/test.sqlite'
-    ],
-    mssql: [
-      'mssql://sa:password@localhost:1433/TestDB',
-      'mssql://user:pass@server:1433/ProductionDB'
-    ]
+   ]
   };
 
   const testConnection = async () => {
