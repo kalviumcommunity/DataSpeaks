@@ -2,10 +2,12 @@ services:
   - type: web
     name: dataspeaks-backend
     env: node
-    buildCommand: cd server && npm install
-    startCommand: cd server && node server.js
+    buildCommand: cd server && npm ci --omit=dev
+    startCommand: cd server && NODE_ENV=production node server.js
     envVars:
       - key: NODE_VERSION
         value: 22.16.0
       - key: GEMINI_API_KEY
         sync: false
+      - key: NODE_ENV
+        value: production
