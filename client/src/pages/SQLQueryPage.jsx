@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { getApiUrl } from '../config/api';
 
 const SQLQueryPage = ({ connection, onDisconnect }) => {
   const [messages, setMessages] = useState([]);
@@ -33,7 +34,7 @@ const SQLQueryPage = ({ connection, onDisconnect }) => {
     // Load sample questions
     const loadQuestions = async () => {
       try {
-        const response = await fetch(`/api/sql/${connection.connectionId}/sample-questions`);
+        const response = await fetch(getApiUrl(`/api/sql/${connection.connectionId}/sample-questions`));
         if (response.ok) {
           const data = await response.json();
           setSampleQuestions(data.questions || []);
@@ -61,7 +62,7 @@ const SQLQueryPage = ({ connection, onDisconnect }) => {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`/api/sql/${connection.connectionId}/query`, {
+      const response = await fetch(getApiUrl(`/api/sql/${connection.connectionId}/query`), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

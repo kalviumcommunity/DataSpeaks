@@ -1,5 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
+import { getApiUrl } from '../config/api';
 
 export default function FileUploader({ onUpload }) {
   const [file, setFile] = useState(null);
@@ -13,7 +14,7 @@ export default function FileUploader({ onUpload }) {
 
     setLoading(true);
     try {
-      await axios.post("http://localhost:5000/api/upload", formData, {
+      await axios.post(getApiUrl("/api/upload"), formData, {
         headers: { "Content-Type": "multipart/form-data" }
       });
       alert("File uploaded & processed!");

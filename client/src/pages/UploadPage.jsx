@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getApiUrl } from '../config/api';
 
 function UploadPage({ onUpload }) {
   const [file, setFile] = useState(null);
@@ -44,7 +45,7 @@ function UploadPage({ onUpload }) {
     formData.append('file', file);
     
     try {
-      const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      const res = await fetch(getApiUrl('/api/upload'), { method: 'POST', body: formData });
       
       if (!res.ok) {
         const errorText = await res.text();
