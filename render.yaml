@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: dataspeaks
+    env: node
+    buildCommand: npm install && cd client && npm install && npm run build && cd ../server && npm install
+    startCommand: cd server && npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 22.16.0
+      - key: GEMINI_API_KEY
+        sync: false
