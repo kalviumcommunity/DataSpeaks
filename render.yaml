@@ -1,8 +1,8 @@
 services:
   - type: web
-    name: dataspeaks
+    name: dataspeaks-backend
     env: node
-    buildCommand: cd server && npm install && cd ../client && npm install && npm run build
+    buildCommand: cd server && npm install
     startCommand: cd server && node server.js
     envVars:
       - key: NODE_VERSION
