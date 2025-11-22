@@ -28,6 +28,21 @@ const upload = multer({ dest: UPLOAD_DIR });
 // In-memory vector stores
 const vectorStores = {};
 
+// Health check endpoint
+app.get('/', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    message: 'DataSpeaks API Server',
+    version: '1.0.0',
+    endpoints: {
+      mongo: '/api/mongo',
+      sql: '/api/sql',
+      upload: '/api/upload',
+      query: '/api/query'
+    }
+  });
+});
+
 // MongoDB routes
 app.use('/api/mongo', mongoRoutes);
 
