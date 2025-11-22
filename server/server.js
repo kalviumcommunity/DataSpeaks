@@ -103,14 +103,14 @@ app.post('/api/query', async (req, res) => {
 });
 
 // Handle client-side routing - must be after API routes
-app.get('*', (req, res) => {
-  const indexPath = path.join(clientBuildPath, 'index.html');
-  if (fs.existsSync(indexPath)) {
+if (fs.existsSync(clientBuildPath)) {
+  app.get('/*', (req, res) => {
+    const indexPath = path.join(clientBuildPath, 'index.html');
     res.sendFile(indexPath);
-  } else {
-    res.status(404).send('Client build not found. Please run `npm run build` in the client directory.');
-  }
-});
+  });
+} else {
+  console.log('⚠️  Skipping client routing - build not found');
+}
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`🚀 Server running at http://localhost:${port}`));
