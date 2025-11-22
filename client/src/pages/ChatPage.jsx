@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { getApiUrl } from '../config/api';
 
 function ChatPage() {
   const [question, setQuestion] = useState('');
@@ -47,7 +48,7 @@ function ChatPage() {
     setQuestion('');
     
     try {
-      const res = await fetch('/api/query', {
+      const res = await fetch(getApiUrl('/api/query'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ fileId, question: currentQuestion })

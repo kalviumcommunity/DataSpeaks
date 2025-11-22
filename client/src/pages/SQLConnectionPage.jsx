@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { getApiUrl } from '../config/api';
 
 const SQLConnectionPage = ({ onConnect }) => {
   const [connectionString, setConnectionString] = useState('');
@@ -27,7 +28,7 @@ const SQLConnectionPage = ({ onConnect }) => {
 
     try {
       console.log('🧪 Testing SQL connection...');
-      const res = await fetch('/api/sql/test', {
+      const res = await fetch(getApiUrl('/api/sql/test'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ connectionString: connectionString.trim() }),
@@ -70,7 +71,7 @@ const SQLConnectionPage = ({ onConnect }) => {
 
     try {
       console.log('🔗 Connecting to SQL database...');
-      const res = await fetch('/api/sql/connect', {
+      const res = await fetch(getApiUrl('/api/sql/connect'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ connectionString: connectionString.trim() }),

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import JsonFormatter from './JsonFormatter';
+import { getApiUrl } from '../config/api';
 
 function MongoQueryPage({ connection, onDisconnect }) {
   const [question, setQuestion] = useState('');
@@ -10,7 +11,7 @@ function MongoQueryPage({ connection, onDisconnect }) {
 
   const loadSampleQuestions = useCallback(async () => {
     try {
-      const res = await fetch(`/api/mongo/${connection.connectionId}/samples`);
+      const res = await fetch(getApiUrl(`/api/mongo/${connection.connectionId}/samples`));
       const result = await res.json();
       if (result.success) {
         setSampleQuestions(result.questions);
@@ -57,7 +58,7 @@ function MongoQueryPage({ connection, onDisconnect }) {
     setQuestion('');
 
     try {
-      const res = await fetch(`/api/mongo/${connection.connectionId}/query`, {
+      const res = await fetch(getApiUrl(`/api/mongo/${connection.connectionId}/query`), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
