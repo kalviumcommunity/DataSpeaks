@@ -15,6 +15,7 @@ import { storeEmbeddings } from './utils/embeddingsStore.js';
 config();
 
 console.log('🔑 API Key loaded:', process.env.GEMINI_API_KEY ? 'Yes' : 'No');
+console.log('🚀 Starting DataSpeaks API Server...');
 
 const app = express();
 app.use(cors());
