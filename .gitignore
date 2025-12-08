@@ -44,3 +44,6 @@ Thumbs.db
 # Build outputs
 dist/
 build/
+
+# ChromaDB persistent storage
+server/chroma_data/

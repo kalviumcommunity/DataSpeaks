@@ -1,4 +1,4 @@
-import { ChatGoogleGenerativeAI } from '@langchain/google-genai';
+import { ChatOllama } from '@langchain/ollama';
 import dotenv from 'dotenv';
 
 // Load environment variables
@@ -6,9 +6,9 @@ dotenv.config();
 
 class SQLQueryService {
   constructor() {
-    this.model = new ChatGoogleGenerativeAI({
-      apiKey: process.env.GEMINI_API_KEY,
-      model: 'gemini-2.0-flash',
+    this.model = new ChatOllama({
+      model: 'mistral',
+      baseUrl: 'http://localhost:11434',
       temperature: 0.1,
     });
   }
@@ -218,30 +218,214 @@ Respond with valid JSON only:`;
     };
   }
 
-  // Explain query results in natural language
+  // Explain query results in natural language with insights
   async explainResults(query, results, question, dbType = 'mysql') {
-    const prompt = `Explain these SQL query results in natural language:
+    const resultsArray = Array.isArray(results) ? results : [results];
+    const dataAnalysis = this.analyzeData(resultsArray);
+    
+    const prompt = `You are a data analyst explaining SQL query results to a non-technical business user.
 
-Database Type: ${dbType.toUpperCase()}
-Original Question: "${question}"
-SQL Query Used: ${query}
-Number of Results: ${Array.isArray(results) ? results.length : 1}
-Sample Results: ${JSON.stringify(Array.isArray(results) ? results.slice(0, 3) : results, null, 2)}
+DATABASE CONTEXT:
+- Database Type: ${dbType.toUpperCase()}
+- Original Question: "${question}"
+- SQL Query: ${query}
 
-Provide a clear, concise explanation of what the results mean in the context of the original question.
-Include insights about the data if apparent from the results.
-Keep it under 150 words and make it user-friendly.`;
+RESULTS SUMMARY:
+- Total Records: ${resultsArray.length}
+- Column Count: ${dataAnalysis.columnCount}
+- Sample Data: ${JSON.stringify(resultsArray.slice(0, 5), null, 2)}
+
+DATA ANALYSIS:
+${JSON.stringify(dataAnalysis, null, 2)}
+
+YOUR TASK:
+1. Answer the original question directly in plain English
+2. Highlight key insights, trends, or patterns you notice
+3. Mention notable numbers (totals, averages, top values)
+4. If there are percentage changes or comparisons, explain them
+5. Point out any surprises or interesting findings
+6. Keep it conversational and business-focused (not technical)
+
+FORMAT YOUR RESPONSE AS:
+📊 **Direct Answer**: [One sentence answering the question]
+
+💡 **Key Insights**:
+- [Insight 1 with specific numbers]
+- [Insight 2 with context]
+- [Insight 3 if applicable]
+
+📈 **What This Means**: [Brief business context or recommendation]
+
+Keep under 200 words. Use emojis sparingly. Be specific with numbers.`;
 
     try {
       const response = await this.model.invoke(prompt);
-      return { success: true, explanation: response.content };
+      return { 
+        success: true, 
+        explanation: response.content,
+        analysis: dataAnalysis
+      };
     } catch (error) {
       console.error('SQL explanation error:', error);
       return { 
         success: false, 
-        explanation: `Query executed successfully and returned ${Array.isArray(results) ? results.length : 1} result(s).`
+        explanation: `✅ Query executed successfully and returned ${resultsArray.length} result(s).\n\n${this.generateBasicInsight(resultsArray, question)}`,
+        analysis: dataAnalysis
       };
     }
+  }
+
+  // Analyze data to find patterns and insights
+  analyzeData(results) {
+    if (!results || results.length === 0) {
+      return { columnCount: 0, hasData: false };
+    }
+
+    const firstRow = results[0];
+    const columns = Object.keys(firstRow);
+    const analysis = {
+      columnCount: columns.length,
+      rowCount: results.length,
+      hasData: true,
+      columns: {},
+      patterns: []
+    };
+
+    // Analyze each column
+    columns.forEach(col => {
+      const values = results.map(row => row[col]).filter(v => v !== null && v !== undefined);
+      const uniqueValues = [...new Set(values)];
+      
+      analysis.columns[col] = {
+        type: this.detectColumnType(values),
+        uniqueCount: uniqueValues.length,
+        hasNulls: values.length < results.length,
+      };
+
+      // Add statistics for numeric columns
+      if (this.detectColumnType(values) === 'numeric') {
+        const numbers = values.map(v => parseFloat(v)).filter(n => !isNaN(n));
+        if (numbers.length > 0) {
+          analysis.columns[col].min = Math.min(...numbers);
+          analysis.columns[col].max = Math.max(...numbers);
+          analysis.columns[col].avg = numbers.reduce((a, b) => a + b, 0) / numbers.length;
+          analysis.columns[col].sum = numbers.reduce((a, b) => a + b, 0);
+        }
+      }
+
+      // Find top values for categorical columns
+      if (this.detectColumnType(values) === 'categorical' && uniqueValues.length <= 20) {
+        const frequency = {};
+        values.forEach(v => frequency[v] = (frequency[v] || 0) + 1);
+        analysis.columns[col].topValues = Object.entries(frequency)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 5)
+          .map(([value, count]) => ({ value, count, percentage: ((count / results.length) * 100).toFixed(1) }));
+      }
+    });
+
+    // Detect patterns
+    if (results.length > 1) {
+      // Check for time series
+      const dateColumns = columns.filter(col => 
+        this.detectColumnType(results.map(r => r[col])) === 'date'
+      );
+      if (dateColumns.length > 0) {
+        analysis.patterns.push('time_series');
+      }
+
+      // Check for aggregations (single row with aggregate functions)
+      if (results.length === 1 && columns.some(col => 
+        col.toLowerCase().includes('count') || 
+        col.toLowerCase().includes('sum') || 
+        col.toLowerCase().includes('avg') ||
+        col.toLowerCase().includes('total')
+      )) {
+        analysis.patterns.push('aggregation');
+      }
+
+      // Check for ranking (has sequential or ranked data)
+      if (columns.some(col => col.toLowerCase().includes('rank') || col.toLowerCase().includes('top'))) {
+        analysis.patterns.push('ranking');
+      }
+    }
+
+    return analysis;
+  }
+
+  // Detect column data type
+  detectColumnType(values) {
+    if (!values || values.length === 0) return 'unknown';
+    
+    const sampleValues = values.slice(0, Math.min(100, values.length));
+    
+    // Check if numeric
+    const numericCount = sampleValues.filter(v => 
+      !isNaN(parseFloat(v)) && isFinite(v)
+    ).length;
+    if (numericCount / sampleValues.length > 0.8) return 'numeric';
+    
+    // Check if date
+    const dateCount = sampleValues.filter(v => {
+      const d = new Date(v);
+      return d instanceof Date && !isNaN(d);
+    }).length;
+    if (dateCount / sampleValues.length > 0.8) return 'date';
+    
+    // Check if boolean
+    const boolCount = sampleValues.filter(v => 
+      v === true || v === false || v === 0 || v === 1 || 
+      (typeof v === 'string' && ['true', 'false', 'yes', 'no'].includes(v.toLowerCase()))
+    ).length;
+    if (boolCount / sampleValues.length > 0.8) return 'boolean';
+    
+    // Check if categorical (limited unique values)
+    const uniqueValues = [...new Set(sampleValues)];
+    if (uniqueValues.length <= Math.min(20, sampleValues.length * 0.5)) {
+      return 'categorical';
+    }
+    
+    return 'text';
+  }
+
+  // Generate basic insight when AI fails
+  generateBasicInsight(results, question) {
+    if (!results || results.length === 0) {
+      return '📭 No data found matching your criteria.';
+    }
+
+    const columns = Object.keys(results[0]);
+    const insights = [];
+
+    // Count insight
+    if (results.length === 1 && columns.some(col => col.toLowerCase().includes('count'))) {
+      const countCol = columns.find(col => col.toLowerCase().includes('count'));
+      insights.push(`💡 Found ${results[0][countCol]} records.`);
+    } else if (results.length > 1) {
+      insights.push(`📊 Found ${results.length} records.`);
+    }
+
+    // Numeric insights
+    columns.forEach(col => {
+      const values = results.map(row => row[col]).filter(v => v !== null);
+      if (values.length > 0 && !isNaN(parseFloat(values[0]))) {
+        const numbers = values.map(v => parseFloat(v));
+        const sum = numbers.reduce((a, b) => a + b, 0);
+        const avg = sum / numbers.length;
+        const max = Math.max(...numbers);
+        const min = Math.min(...numbers);
+        
+        if (col.toLowerCase().includes('total') || col.toLowerCase().includes('sum')) {
+          insights.push(`💰 Total ${col}: ${sum.toLocaleString()}`);
+        } else if (col.toLowerCase().includes('avg') || col.toLowerCase().includes('average')) {
+          insights.push(`📊 Average ${col}: ${avg.toFixed(2)}`);
+        } else if (results.length > 5) {
+          insights.push(`📈 ${col} ranges from ${min} to ${max} (avg: ${avg.toFixed(2)})`);
+        }
+      }
+    });
+
+    return insights.length > 0 ? insights.join('\n') : '📋 Data retrieved successfully.';
   }
 
   // Validate SQL query for security
