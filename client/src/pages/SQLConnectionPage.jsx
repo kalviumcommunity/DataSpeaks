@@ -7,17 +7,38 @@ const SQLConnectionPage = ({ onConnect }) => {
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState(null);
   const [selectedDbType, setSelectedDbType] = useState('mysql');
+  const [showHelp, setShowHelp] = useState(false);
 
   const dbTypes = [
-    { id: 'mysql', name: 'MySQL', example: 'mysql://username:password@localhost:3306/database' }
-   
+    { 
+      id: 'mysql', 
+      name: 'MySQL', 
+      example: 'mysql://username:password@localhost:3306/database',
+      description: 'Most popular open-source database',
+      icon: '🐬'
+    }
   ];
+
+  const quickStartExamples = {
+    mysql: [
+      {
+        label: 'Local MySQL (Default)',
+        value: 'mysql://root:password@localhost:3306/your_database',
+        description: 'Connect to MySQL running on your computer'
+      },
+      {
+        label: 'Remote MySQL Server',
+        value: 'mysql://user:pass@192.168.1.100:3306/database',
+        description: 'Connect to MySQL on another server'
+      }
+    ]
+  };
 
   const sampleConnections = {
     mysql: [
-      'mysql://root:password@localhost:3306/test',
-      'mysql://user:pass@192.168.1.100:3306/inventory'
-   ]
+      'mysql://root:password@localhost:3306/database_name',
+      'mysql://user:pass@hostname:3306/db_name'
+    ]
   };
 
   const testConnection = async () => {
