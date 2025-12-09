@@ -7,7 +7,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 
-const COLORS = ['#8b5cf6', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#14b8a6', '#6366f1'];
+const COLORS = ['#f97316', '#fb923c', '#10b981', '#facc15', '#ef4444', '#f472b6', '#14b8a6', '#fbbf24'];
 
 const DashboardPage = ({ connection, onBack }) => {
   const [dashboards, setDashboards] = useState([]);
@@ -111,12 +111,12 @@ const DashboardPage = ({ connection, onBack }) => {
       <ResponsiveContainer width="100%" height={300}>
         {chartType === 'bar' && (
           <BarChart data={data.slice(0, 20)}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-            <XAxis dataKey={xAxis} stroke="#9ca3af" />
-            <YAxis stroke="#9ca3af" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <XAxis dataKey={xAxis} stroke="#6b7280" />
+            <YAxis stroke="#6b7280" />
             <Tooltip 
-              contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: '8px' }}
-              labelStyle={{ color: '#e5e7eb' }}
+              contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #fed7aa', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
+              labelStyle={{ color: '#1f2937' }}
             />
             <Legend />
             {numericColumns.map((col, idx) => (
@@ -127,12 +127,12 @@ const DashboardPage = ({ connection, onBack }) => {
 
         {chartType === 'line' && (
           <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-            <XAxis dataKey={xAxis} stroke="#9ca3af" />
-            <YAxis stroke="#9ca3af" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <XAxis dataKey={xAxis} stroke="#6b7280" />
+            <YAxis stroke="#6b7280" />
             <Tooltip 
-              contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: '8px' }}
-              labelStyle={{ color: '#e5e7eb' }}
+              contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #fed7aa', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
+              labelStyle={{ color: '#1f2937' }}
             />
             <Legend />
             {numericColumns.map((col, idx) => (
@@ -151,12 +151,12 @@ const DashboardPage = ({ connection, onBack }) => {
                 </linearGradient>
               ))}
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-            <XAxis dataKey={xAxis} stroke="#9ca3af" />
-            <YAxis stroke="#9ca3af" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <XAxis dataKey={xAxis} stroke="#6b7280" />
+            <YAxis stroke="#6b7280" />
             <Tooltip 
-              contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: '8px' }}
-              labelStyle={{ color: '#e5e7eb' }}
+              contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #fed7aa', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
+              labelStyle={{ color: '#1f2937' }}
             />
             <Legend />
             {numericColumns.map((col, idx) => (
@@ -188,7 +188,7 @@ const DashboardPage = ({ connection, onBack }) => {
               ))}
             </Pie>
             <Tooltip 
-              contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151', borderRadius: '8px' }}
+              contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #fed7aa', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
             />
             <Legend />
           </PieChart>
@@ -199,10 +199,10 @@ const DashboardPage = ({ connection, onBack }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-orange-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-500 border-t-transparent mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading dashboards...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-orange-500 border-t-transparent mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading dashboards...</p>
         </div>
       </div>
     );
@@ -210,23 +210,23 @@ const DashboardPage = ({ connection, onBack }) => {
 
   if (selectedDashboard) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 p-6">
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-orange-50 p-6">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-2xl p-6 mb-6">
+          <div className="bg-white/90 backdrop-blur-sm border border-orange-200 rounded-2xl p-6 mb-6 shadow-md">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <button
                   onClick={() => setSelectedDashboard(null)}
-                  className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+                  className="p-2 hover:bg-orange-100 rounded-lg transition-colors"
                 >
-                  <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                   </svg>
                 </button>
                 <div>
-                  <h1 className="text-3xl font-bold text-white">{selectedDashboard.name}</h1>
-                  <p className="text-gray-400 mt-1">{selectedDashboard.description}</p>
+                  <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-amber-500 bg-clip-text text-transparent">{selectedDashboard.name}</h1>
+                  <p className="text-gray-600 mt-1">{selectedDashboard.description}</p>
                   <p className="text-sm text-gray-500 mt-2">
                     {selectedDashboard.insights?.length || 0} insights • Last updated {new Date(selectedDashboard.updatedAt).toLocaleString()}
                   </p>
@@ -235,7 +235,7 @@ const DashboardPage = ({ connection, onBack }) => {
               <div className="flex gap-2">
                 <button
                   onClick={() => shareDashboard(selectedDashboard.id)}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all flex items-center gap-2"
+                  className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-all flex items-center gap-2 shadow-md"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
@@ -244,7 +244,7 @@ const DashboardPage = ({ connection, onBack }) => {
                 </button>
                 <button
                   onClick={() => exportDashboardPDF(selectedDashboard)}
-                  className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all flex items-center gap-2"
+                  className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-all flex items-center gap-2 shadow-md"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -259,11 +259,11 @@ const DashboardPage = ({ connection, onBack }) => {
           {selectedDashboard.insights && selectedDashboard.insights.length > 0 ? (
             <div className="grid gap-6">
               {selectedDashboard.insights.map((insight) => (
-                <div key={insight.id} className="bg-gray-800/50 border border-gray-700 rounded-2xl p-6">
+                <div key={insight.id} className="bg-white/90 border border-orange-200 rounded-2xl p-6 shadow-md">
                   <div className="flex items-start justify-between mb-4">
                     <div>
-                      <h3 className="text-xl font-semibold text-white mb-2">{insight.question}</h3>
-                      <p className="text-sm text-gray-400">
+                      <h3 className="text-xl font-semibold text-gray-800 mb-2">{insight.question}</h3>
+                      <p className="text-sm text-gray-500">
                         Added {new Date(insight.addedAt).toLocaleString()}
                       </p>
                     </div>
@@ -278,8 +278,8 @@ const DashboardPage = ({ connection, onBack }) => {
                   </div>
 
                   {insight.aiExplanation && (
-                    <div className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border border-green-400/30 p-4 mb-4 rounded-xl">
-                      <p className="text-sm text-green-200 whitespace-pre-wrap">{insight.aiExplanation}</p>
+                    <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-300 p-4 mb-4 rounded-xl">
+                      <p className="text-sm text-green-700 whitespace-pre-wrap">{insight.aiExplanation}</p>
                     </div>
                   )}
 
@@ -294,11 +294,11 @@ const DashboardPage = ({ connection, onBack }) => {
               ))}
             </div>
           ) : (
-            <div className="bg-gray-800/50 border border-gray-700 rounded-2xl p-12 text-center">
-              <svg className="w-16 h-16 text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-white/90 border border-orange-200 rounded-2xl p-12 text-center shadow-md">
+              <svg className="w-16 h-16 text-orange-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 00-2-2m0 0h2m-6 0h6" />
               </svg>
-              <p className="text-gray-400 text-lg">No insights saved yet</p>
+              <p className="text-gray-700 text-lg">No insights saved yet</p>
               <p className="text-gray-500 text-sm mt-2">Query your database and save interesting insights here</p>
             </div>
           )}
@@ -308,18 +308,18 @@ const DashboardPage = ({ connection, onBack }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-orange-50 p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-2xl p-6 mb-6">
+        <div className="bg-white/90 backdrop-blur-sm border border-orange-200 rounded-2xl p-6 mb-6 shadow-md">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-white mb-2">My Dashboards</h1>
-              <p className="text-gray-400">Manage your saved insights and visualizations</p>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-orange-600 to-amber-500 bg-clip-text text-transparent mb-2">My Dashboards</h1>
+              <p className="text-gray-600">Manage your saved insights and visualizations</p>
             </div>
             <button
               onClick={onBack}
-              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-all flex items-center gap-2"
+              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-all flex items-center gap-2 shadow-md"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -335,16 +335,16 @@ const DashboardPage = ({ connection, onBack }) => {
             {dashboards.map((dashboard) => (
               <div
                 key={dashboard.id}
-                className="bg-gray-800/50 border border-gray-700 rounded-2xl p-6 hover:border-purple-500/50 transition-all cursor-pointer group"
+                className="bg-white/90 border border-orange-200 rounded-2xl p-6 hover:border-orange-400 hover:shadow-lg transition-all cursor-pointer group"
                 onClick={() => setSelectedDashboard(dashboard)}
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-600 rounded-xl flex items-center justify-center">
+                    <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-amber-500 rounded-xl flex items-center justify-center shadow-md">
                       <span className="text-2xl">📊</span>
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-white group-hover:text-purple-300 transition-colors">
+                      <h3 className="text-lg font-semibold text-gray-800 group-hover:text-orange-600 transition-colors">
                         {dashboard.name}
                       </h3>
                       <p className="text-xs text-gray-500">
@@ -364,20 +364,20 @@ const DashboardPage = ({ connection, onBack }) => {
                     </svg>
                   </button>
                 </div>
-                <p className="text-sm text-gray-400 mb-4 line-clamp-2">{dashboard.description}</p>
-                <div className="flex items-center justify-between text-xs text-gray-500 pt-4 border-t border-gray-700">
+                <p className="text-sm text-gray-600 mb-4 line-clamp-2">{dashboard.description}</p>
+                <div className="flex items-center justify-between text-xs text-gray-500 pt-4 border-t border-orange-200">
                   <span>Updated {new Date(dashboard.updatedAt).toLocaleDateString()}</span>
-                  <span className="text-purple-400">View →</span>
+                  <span className="text-orange-600 font-medium">View →</span>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="bg-gray-800/50 border border-gray-700 rounded-2xl p-12 text-center">
-            <svg className="w-16 h-16 text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-white/90 border border-orange-200 rounded-2xl p-12 text-center shadow-md">
+            <svg className="w-16 h-16 text-orange-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 00-2-2m0 0h2m-6 0h6" />
             </svg>
-            <p className="text-gray-400 text-lg mb-2">No dashboards yet</p>
+            <p className="text-gray-700 text-lg mb-2">No dashboards yet</p>
             <p className="text-gray-500 text-sm">Start querying your database and save insights to dashboards</p>
           </div>
         )}
