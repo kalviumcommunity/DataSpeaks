@@ -151,23 +151,23 @@ const SQLConnectionPage = ({ onConnect }) => {
         {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-4 mb-4">
-            <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-blue-600 rounded-2xl flex items-center justify-center">
+            <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-amber-500 rounded-2xl flex items-center justify-center shadow-lg">
               <span className="text-3xl">💾</span>
             </div>
             <div className="text-left">
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
                 Connect to SQL Database
               </h1>
-              <p className="text-gray-400 text-lg">MySQL, PostgreSQL, SQLite, SQL Server supported</p>
+              <p className="text-gray-600 text-lg">MySQL, PostgreSQL, SQLite, SQL Server supported</p>
             </div>
           </div>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Connection Form */}
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-8 border border-gray-700/50">
-            <h2 className="text-2xl font-semibold text-white mb-8 flex items-center gap-3">
-              <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 border border-orange-200 shadow-xl">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-8 flex items-center gap-3">
+              <svg className="w-6 h-6 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
               Database Connection
@@ -175,7 +175,7 @@ const SQLConnectionPage = ({ onConnect }) => {
 
             {/* Database Type Selection */}
             <div className="mb-8">
-              <label className="block text-sm font-medium text-gray-300 mb-4">Database Type</label>
+              <label className="block text-sm font-medium text-gray-700 mb-4">Database Type</label>
               <div className="grid grid-cols-2 gap-3">
                 {dbTypes.map((db) => (
                   <button
@@ -187,8 +187,8 @@ const SQLConnectionPage = ({ onConnect }) => {
                     }}
                     className={`p-4 rounded-xl border text-left transition-all ${
                       selectedDbType === db.id
-                        ? 'border-purple-500 bg-purple-500/20 text-purple-300'
-                        : 'border-gray-600 hover:border-gray-500 text-gray-300 hover:bg-gray-700/30'
+                        ? 'border-orange-400 bg-orange-50 text-orange-700 shadow-md'
+                        : 'border-orange-200 hover:border-orange-300 text-gray-700 hover:bg-orange-50/50'
                     }`}
                   >
                     <div className="font-medium">{db.name}</div>
@@ -199,7 +199,7 @@ const SQLConnectionPage = ({ onConnect }) => {
 
             {/* Connection String Input */}
             <div className="mb-8">
-              <label className="block text-sm font-medium text-gray-300 mb-3">
+              <label className="block text-sm font-medium text-gray-700 mb-3">
                 Connection String
               </label>
               <div className="relative">
@@ -208,10 +208,10 @@ const SQLConnectionPage = ({ onConnect }) => {
                   value={connectionString}
                   onChange={(e) => setConnectionString(e.target.value)}
                   placeholder={currentDbType?.example || 'Enter your connection string'}
-                  className="w-full px-4 py-4 bg-gray-900/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all"
+                  className="w-full px-4 py-4 bg-white border border-orange-200 rounded-xl text-gray-800 placeholder-gray-400 focus:ring-2 focus:ring-orange-400 focus:border-orange-400 transition-all"
                 />
                 <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
-                  <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
@@ -223,11 +223,11 @@ const SQLConnectionPage = ({ onConnect }) => {
               <button
                 onClick={testConnection}
                 disabled={!connectionString.trim() || testing}
-                className="flex-1 px-6 py-4 bg-gray-700/50 text-gray-300 rounded-xl hover:bg-gray-600/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 border border-gray-600"
+                className="flex-1 px-6 py-4 bg-white border border-orange-300 text-gray-700 rounded-xl hover:bg-orange-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
               >
                 {testing ? (
                   <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-400 border-t-transparent"></div>
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-orange-500 border-t-transparent"></div>
                     Testing...
                   </>
                 ) : (
@@ -243,7 +243,7 @@ const SQLConnectionPage = ({ onConnect }) => {
               <button
                 onClick={connectToDatabase}
                 disabled={!connectionString.trim() || connecting}
-                className="flex-1 px-6 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                className="flex-1 px-6 py-4 bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl hover:from-orange-600 hover:to-amber-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-md"
               >
                 {connecting ? (
                   <>
@@ -288,17 +288,17 @@ const SQLConnectionPage = ({ onConnect }) => {
           </div>
 
           {/* Sample Connections */}
-          <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-8 border border-gray-700/50">
-            <h2 className="text-2xl font-semibold text-white mb-8 flex items-center gap-3">
-              <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-8 border border-orange-200 shadow-xl">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-8 flex items-center gap-3">
+              <svg className="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               Sample Connections
             </h2>
 
             <div className="space-y-6">
-              <div className="p-6 bg-gray-700/30 rounded-xl border border-gray-600/50">
-                <h3 className="font-medium text-blue-300 mb-4 flex items-center gap-2">
+                <div className="p-6 bg-orange-50/50 rounded-xl border border-orange-200">
+                <h3 className="font-medium text-orange-700 mb-4 flex items-center gap-2">
                   <span className="text-lg">💾</span>
                   {currentDbType?.name} Examples
                 </h3>
@@ -307,7 +307,7 @@ const SQLConnectionPage = ({ onConnect }) => {
                     <button
                       key={index}
                       onClick={() => fillSampleConnection(sample)}
-                      className="w-full text-left p-4 bg-gray-800/50 rounded-lg border border-gray-600/50 hover:border-blue-500/50 transition-all text-sm font-mono text-gray-300 hover:text-white"
+                      className="w-full text-left p-4 bg-white rounded-lg border border-orange-200 hover:border-orange-400 hover:shadow-md transition-all text-sm font-mono text-gray-700 hover:text-gray-900"
                     >
                       {sample}
                     </button>
@@ -315,32 +315,32 @@ const SQLConnectionPage = ({ onConnect }) => {
                 </div>
               </div>
 
-              <div className="p-6 bg-gray-700/30 rounded-xl border border-gray-600/50">
-                <h3 className="font-medium text-green-300 mb-4 flex items-center gap-2">
+              <div className="p-6 bg-amber-50/50 rounded-xl border border-amber-200">
+                <h3 className="font-medium text-amber-700 mb-4 flex items-center gap-2">
                   <span className="text-lg">📋</span>
                   Connection Format
                 </h3>
-                <p className="text-sm text-gray-300 font-mono bg-gray-800/50 p-4 rounded-lg border border-gray-600/50">
+                <p className="text-sm text-gray-700 font-mono bg-white p-4 rounded-lg border border-amber-200">
                   {currentDbType?.example}
                 </p>
               </div>
 
-              <div className="p-6 bg-gray-700/30 rounded-xl border border-gray-600/50">
-                <h3 className="font-medium text-yellow-300 mb-4 flex items-center gap-2">
+              <div className="p-6 bg-yellow-50/50 rounded-xl border border-yellow-300">
+                <h3 className="font-medium text-yellow-700 mb-4 flex items-center gap-2">
                   <span className="text-lg">🔒</span>
                   Security Notice
                 </h3>
-                <div className="text-sm text-gray-300 space-y-2">
+                <div className="text-sm text-gray-700 space-y-2">
                   <div className="flex items-center gap-2">
-                    <span className="w-1 h-1 bg-yellow-400 rounded-full"></span>
+                    <span className="w-1 h-1 bg-yellow-600 rounded-full"></span>
                     <span>Only SELECT operations are allowed</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="w-1 h-1 bg-yellow-400 rounded-full"></span>
+                    <span className="w-1 h-1 bg-yellow-600 rounded-full"></span>
                     <span>Connection strings are encrypted</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="w-1 h-1 bg-yellow-400 rounded-full"></span>
+                    <span className="w-1 h-1 bg-yellow-600 rounded-full"></span>
                     <span>Read-only database access recommended</span>
                   </div>
                 </div>
