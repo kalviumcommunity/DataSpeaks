@@ -1,6 +1,9 @@
 import express from 'express';
 import cors from 'cors';
+import session from 'express-session';
 import { config } from 'dotenv';
+import { passport } from './config/passport.js';
+import authRoutes from './routes/authRoutes.js';
 import sqlRoutes from './routes/sql.routes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
 
@@ -16,9 +19,28 @@ console.log('🔑 API Key loaded:', process.env.GEMINI_API_KEY ? 'Yes' : 'No');
 console.log('🚀 Starting DataSpeaks SQL Query API Server...');
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Session middleware
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'dataspeaks-secret-key-change-in-production',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+  }
+}));
+
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Health check endpoint
 app.get('/', (req, res) => {
@@ -29,6 +51,7 @@ app.get('/', (req, res) => {
     timestamp: new Date().toISOString(),
     endpoints: {
       health: '/',
+      auth: '/api/auth',
       sql: '/api/sql',
       dashboards: '/api/dashboards'
     }
@@ -36,6 +59,7 @@ app.get('/', (req, res) => {
 });
 
 // API Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/sql', sqlRoutes);
 app.use('/api/dashboards', dashboardRoutes);
 
@@ -44,7 +68,7 @@ app.use((req, res) => {
   res.status(404).json({
     error: 'Not Found',
     message: `Cannot ${req.method} ${req.path}`,
-    availableEndpoints: ['/api/sql', '/api/dashboards']
+    availableEndpoints: ['/api/auth', '/api/sql', '/api/dashboards']
   });
 });
 
