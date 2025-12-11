@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getApiUrl } from '../config/api';
 import DataTable from '../components/DataTable';
 import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
-  AreaChart, Area, ScatterChart, Scatter,
+  AreaChart, Area,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 
@@ -14,11 +14,7 @@ const DashboardPage = ({ connection, onBack }) => {
   const [selectedDashboard, setSelectedDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadDashboards();
-  }, [connection.connectionId]);
-
-  const loadDashboards = async () => {
+  const loadDashboards = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(getApiUrl(`/api/dashboards?connectionId=${connection.connectionId}`));
@@ -31,7 +27,11 @@ const DashboardPage = ({ connection, onBack }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [connection.connectionId]);
+
+  useEffect(() => {
+    loadDashboards();
+  }, [loadDashboards]);
 
   const deleteDashboard = async (dashboardId) => {
     if (!confirm('Are you sure you want to delete this dashboard?')) return;
@@ -90,7 +90,7 @@ const DashboardPage = ({ connection, onBack }) => {
     }
   };
 
-  const exportDashboardPDF = (dashboard) => {
+  const exportDashboardPDF = () => {
     alert('📄 PDF export coming soon! This will generate a professional report with all insights.');
   };
 

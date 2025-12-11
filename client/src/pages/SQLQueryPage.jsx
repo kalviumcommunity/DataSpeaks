@@ -120,6 +120,11 @@ const SQLQueryPage = ({ connection, onDisconnect, onViewDashboards }) => {
 
   useEffect(() => {
     // Add welcome message with friendly tone
+    const isMongoDb = connection.databaseType === 'mongodb';
+    const dataStructures = isMongoDb 
+      ? (connection.collections || connection.tables || [])
+      : (connection.tables || []);
+    
     const welcomeMessage = {
       id: Date.now(),
       type: 'system',
@@ -127,10 +132,15 @@ const SQLQueryPage = ({ connection, onDisconnect, onViewDashboards }) => {
       timestamp: new Date().toISOString(),
       metadata: {
         databaseType: connection.databaseType,
-        tableCount: connection.tables?.length || 0,
-        tables: connection.tables?.map(t => t.name) || []
+        tableCount: dataStructures.length,
+        tables: dataStructures.map(t => t.name || t)
       },
-      helpText: [
+      helpText: isMongoDb ? [
+        "💬 Ask me questions in plain English - no MongoDB knowledge needed!",
+        "📊 I'll automatically create visualizations for your data",
+        "🔍 Try questions like: 'Find all active users' or 'Count documents by status'",
+        "💡 I can find, count, aggregate, and analyze your document data!"
+      ] : [
         "💬 Ask me questions in plain English - no SQL knowledge needed!",
         "📊 I'll automatically create visualizations for your data",
         "🔍 Try questions like: 'Show me top 10 customers' or 'What's the total sales?'",
@@ -142,7 +152,8 @@ const SQLQueryPage = ({ connection, onDisconnect, onViewDashboards }) => {
     // Load sample questions
     const loadQuestions = async () => {
       try {
-        const response = await fetch(getApiUrl(`/api/sql/${connection.connectionId}/sample-questions`));
+        const apiBase = connection.databaseType === 'mongodb' ? '/api/mongodb' : '/api/sql';
+        const response = await fetch(getApiUrl(`${apiBase}/${connection.connectionId}/sample-questions`));
         if (response.ok) {
           const data = await response.json();
           setSampleQuestions(data.questions || []);
@@ -170,12 +181,15 @@ const SQLQueryPage = ({ connection, onDisconnect, onViewDashboards }) => {
     setIsLoading(true);
 
     try {
-      const response = await fetch(getApiUrl(`/api/sql/${connection.connectionId}/query`), {
+      const apiBase = connection.databaseType === 'mongodb' ? '/api/mongodb' : '/api/sql';
+      const dataKey = connection.databaseType === 'mongodb' ? 'collections' : 'tables';
+      
+      const response = await fetch(getApiUrl(`${apiBase}/${connection.connectionId}/query`), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           question: question,
-          tables: connection.tables,
+          [dataKey]: connection.tables || connection.collections,
           schema: connection.schema,
         }),
       });
@@ -187,10 +201,10 @@ const SQLQueryPage = ({ connection, onDisconnect, onViewDashboards }) => {
         type: 'bot',
         content: data.success ? 'Query executed successfully!' : 'Query execution failed.',
         timestamp: new Date().toISOString(),
-        sqlQuery: data.sqlQuery,
+        sqlQuery: data.sqlQuery || data.mql || data.query,
         explanation: data.explanation,
         results: data.success ? data.results : null,
-        rowCount: data.rowCount,
+        rowCount: data.rowCount || data.documentCount,
         error: data.success ? null : data.error || data.details,
         aiExplanation: data.aiExplanation,
         metadata: data.metadata || {},

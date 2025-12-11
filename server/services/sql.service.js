@@ -1,6 +1,12 @@
 import mysql from 'mysql2/promise';
+import pg from 'pg';
+import sqlite3 from 'sqlite3';
+import sql from 'mssql';
 import crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
+import { promisify } from 'util';
+
+const { Pool: PgPool } = pg;
 
 class SQLService {
   constructor() {
@@ -50,19 +56,38 @@ class SQLService {
   parseConnectionString(connectionString) {
     if (connectionString.startsWith('mysql://')) {
       return { type: 'mysql', connectionString };
+    } else if (connectionString.startsWith('postgres://') || connectionString.startsWith('postgresql://')) {
+      return { type: 'postgres', connectionString };
+    } else if (connectionString.startsWith('sqlite://') || connectionString.endsWith('.db') || connectionString.endsWith('.sqlite')) {
+      return { type: 'sqlite', connectionString: connectionString.replace('sqlite://', '') };
+    } else if (connectionString.includes('Server=') || connectionString.includes('Data Source=')) {
+      return { type: 'mssql', connectionString };
     } else {
-      // Default to MySQL and assume it's a MySQL connection string
+      // Default to MySQL
       return { type: 'mysql', connectionString };
     }
   }
 
-  // Test connection to MySQL database
+  // Test connection to any database
   async testConnection(connectionString) {
     try {
-      console.log(`🧪 Testing MySQL connection...`);
-      return await this.testMySQLConnection(connectionString);
+      const { type } = this.parseConnectionString(connectionString);
+      console.log(`🧪 Testing ${type.toUpperCase()} connection...`);
+      
+      switch (type) {
+        case 'mysql':
+          return await this.testMySQLConnection(connectionString);
+        case 'postgres':
+          return await this.testPostgresConnection(connectionString);
+        case 'sqlite':
+          return await this.testSQLiteConnection(connectionString.replace('sqlite://', ''));
+        case 'mssql':
+          return await this.testMSSQLConnection(connectionString);
+        default:
+          throw new Error(`Unsupported database type: ${type}`);
+      }
     } catch (error) {
-      console.error('❌ MySQL Connection test failed:', error);
+      console.error('❌ Connection test failed:', error);
       return { success: false, message: error.message };
     }
   }
@@ -75,21 +100,75 @@ class SQLService {
     return { success: true, message: 'MySQL connection successful' };
   }
 
+  // Test PostgreSQL connection
+  async testPostgresConnection(connectionString) {
+    const pool = new PgPool({ connectionString });
+    const client = await pool.connect();
+    await client.query('SELECT 1');
+    client.release();
+    await pool.end();
+    return { success: true, message: 'PostgreSQL connection successful' };
+  }
+
+  // Test SQLite connection
+  async testSQLiteConnection(dbPath) {
+    return new Promise((resolve, reject) => {
+      const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READONLY, (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          db.close();
+          resolve({ success: true, message: 'SQLite connection successful' });
+        }
+      });
+    });
+  }
+
+  // Test SQL Server connection
+  async testMSSQLConnection(connectionString) {
+    await sql.connect(connectionString);
+    await sql.query('SELECT 1');
+    await sql.close();
+    return { success: true, message: 'SQL Server connection successful' };
+  }
+
   // Connect and store connection
   async connect(connectionString) {
     try {
-      console.log('🔌 SQLService: Starting MySQL connection...');
+      const { type, connectionString: parsedConnString } = this.parseConnectionString(connectionString);
+      console.log(`🔌 SQLService: Starting ${type.toUpperCase()} connection...`);
       
       const connectionId = uuidv4();
-      const connection = await this.connectMySQL(connectionString);
-      const databaseName = this.extractDatabaseName(connectionString) || 'mysql';
+      let connection;
+      let databaseName;
+
+      switch (type) {
+        case 'mysql':
+          connection = await this.connectMySQL(parsedConnString);
+          databaseName = this.extractDatabaseName(parsedConnString) || 'mysql';
+          break;
+        case 'postgres':
+          connection = await this.connectPostgres(parsedConnString);
+          databaseName = this.extractDatabaseName(parsedConnString) || 'postgres';
+          break;
+        case 'sqlite':
+          connection = await this.connectSQLite(parsedConnString);
+          databaseName = parsedConnString.split('/').pop().replace('.db', '').replace('.sqlite', '');
+          break;
+        case 'mssql':
+          connection = await this.connectMSSQL(parsedConnString);
+          databaseName = this.extractDatabaseName(parsedConnString) || 'master';
+          break;
+        default:
+          throw new Error(`Unsupported database type: ${type}`);
+      }
       
-      console.log(`✅ SQLService: Connected to MySQL successfully`);
+      console.log(`✅ SQLService: Connected to ${type.toUpperCase()} successfully`);
       
       // Store connection
       this.connections.set(connectionId, {
         connection,
-        type: 'mysql',
+        type,
         databaseName,
         connectionString: this.encrypt(connectionString),
         connectedAt: new Date(),
@@ -98,11 +177,11 @@ class SQLService {
       return { 
         success: true, 
         connectionId,
-        databaseType: 'mysql',
+        databaseType: type,
         databaseName
       };
     } catch (error) {
-      console.error('❌ SQLService: MySQL connection failed:', error.message);
+      console.error('❌ SQLService: Connection failed:', error.message);
       return { success: false, message: error.message };
     }
   }
@@ -110,6 +189,29 @@ class SQLService {
   // Create MySQL connection
   async connectMySQL(connectionString) {
     return await mysql.createConnection(connectionString);
+  }
+
+  // Create PostgreSQL connection
+  async connectPostgres(connectionString) {
+    const pool = new PgPool({ connectionString });
+    const client = await pool.connect();
+    return { pool, client };
+  }
+
+  // Create SQLite connection
+  async connectSQLite(dbPath) {
+    return new Promise((resolve, reject) => {
+      const db = new sqlite3.Database(dbPath, (err) => {
+        if (err) reject(err);
+        else resolve(db);
+      });
+    });
+  }
+
+  // Create SQL Server connection
+  async connectMSSQL(connectionString) {
+    const pool = await sql.connect(connectionString);
+    return pool;
   }
 
   // Extract database name from connection string
@@ -127,7 +229,7 @@ class SQLService {
     }
   }
 
-  // Get available tables from MySQL
+  // Get available tables from any database
   async getTables(connectionId) {
     try {
       console.log('📋 SQLService: Getting tables for connection:', connectionId);
@@ -137,14 +239,56 @@ class SQLService {
         throw new Error('Connection not found');
       }
 
-      const { connection, databaseName } = connectionData;
+      const { connection, type, databaseName } = connectionData;
+      let tables = [];
       
-      // Get MySQL tables
-      const [mysqlRows] = await connection.execute('SHOW TABLES');
-      const tables = mysqlRows.map(row => ({
-        name: Object.values(row)[0],
-        type: 'table'
-      }));
+      switch (type) {
+        case 'mysql': {
+          const [mysqlRows] = await connection.execute('SHOW TABLES');
+          tables = mysqlRows.map(row => ({
+            name: Object.values(row)[0],
+            type: 'table'
+          }));
+          break;
+        }
+        case 'postgres': {
+          const result = await connection.client.query(`
+            SELECT table_name 
+            FROM information_schema.tables 
+            WHERE table_schema = 'public' 
+            AND table_type = 'BASE TABLE'
+          `);
+          tables = result.rows.map(row => ({
+            name: row.table_name,
+            type: 'table'
+          }));
+          break;
+        }
+        case 'sqlite': {
+          tables = await new Promise((resolve, reject) => {
+            connection.all(
+              "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'",
+              (err, rows) => {
+                if (err) reject(err);
+                else resolve(rows.map(row => ({ name: row.name, type: 'table' })));
+              }
+            );
+          });
+          break;
+        }
+        case 'mssql': {
+          const result = await connection.query(`
+            SELECT TABLE_NAME 
+            FROM INFORMATION_SCHEMA.TABLES 
+            WHERE TABLE_TYPE = 'BASE TABLE'
+          `);
+          tables = result.recordset.map(row => ({
+            name: row.TABLE_NAME,
+            type: 'table'
+          }));
+          break;
+        }
+      }
       
       console.log(`✅ SQLService: Found ${tables.length} tables`);
       
@@ -152,7 +296,7 @@ class SQLService {
         success: true,
         tables,
         databaseName,
-        databaseType: 'mysql',
+        databaseType: type,
       };
     } catch (error) {
       console.error('❌ SQLService: Get tables failed:', error.message);
@@ -160,7 +304,7 @@ class SQLService {
     }
   }
 
-  // Execute MySQL query
+  // Execute query on any database
   async executeQuery(connectionId, query, parameters = []) {
     try {
       console.log('🔍 SQLService: Executing query:', query);
@@ -170,11 +314,37 @@ class SQLService {
         throw new Error('Connection not found');
       }
 
-      const { connection } = connectionData;
+      const { connection, type } = connectionData;
+      let result;
       
-      // Execute MySQL query
-      const [mysqlRows] = await connection.execute(query, parameters);
-      const result = Array.isArray(mysqlRows) ? mysqlRows : [mysqlRows];
+      switch (type) {
+        case 'mysql': {
+          const [mysqlRows] = await connection.execute(query, parameters);
+          result = Array.isArray(mysqlRows) ? mysqlRows : [mysqlRows];
+          break;
+        }
+        case 'postgres': {
+          const pgResult = await connection.client.query(query, parameters);
+          result = pgResult.rows;
+          break;
+        }
+        case 'sqlite': {
+          result = await new Promise((resolve, reject) => {
+            connection.all(query, parameters, (err, rows) => {
+              if (err) reject(err);
+              else resolve(rows);
+            });
+          });
+          break;
+        }
+        case 'mssql': {
+          const msResult = await connection.query(query);
+          result = msResult.recordset;
+          break;
+        }
+        default:
+          throw new Error(`Unsupported database type: ${type}`);
+      }
       
       console.log(`✅ SQLService: Query executed successfully, ${result.length || 0} rows`);
       
@@ -194,7 +364,7 @@ class SQLService {
     }
   }
 
-  // Get MySQL database schema information
+  // Get database schema information
   async getSchema(connectionId) {
     try {
       const connectionData = this.connections.get(connectionId);
@@ -202,7 +372,7 @@ class SQLService {
         throw new Error('Connection not found');
       }
 
-      const { connection } = connectionData;
+      const { connection, type } = connectionData;
       const schema = {};
       
       const tablesResult = await this.getTables(connectionId);
@@ -211,13 +381,13 @@ class SQLService {
       }
 
       for (const table of tablesResult.tables) {
-        schema[table.name] = await this.getTableColumns(connectionId, table.name, connection);
+        schema[table.name] = await this.getTableColumns(connectionId, table.name, connection, type);
       }
       
       return {
         success: true,
         schema,
-        databaseType: 'mysql',
+        databaseType: type,
       };
     } catch (error) {
       console.error('❌ SQLService: Get schema failed:', error.message);
@@ -225,18 +395,69 @@ class SQLService {
     }
   }
 
-  // Get columns for a specific MySQL table
-  async getTableColumns(connectionId, tableName, connection) {
+  // Get columns for a specific table
+  async getTableColumns(connectionId, tableName, connection, type) {
     try {
-      // Get MySQL table columns
-      const [mysqlCols] = await connection.execute(`DESCRIBE ${tableName}`);
-      const columns = mysqlCols.map(col => ({
-        name: col.Field,
-        type: col.Type,
-        nullable: col.Null === 'YES',
-        key: col.Key,
-        default: col.Default,
-      }));
+      let columns = [];
+
+      switch (type) {
+        case 'mysql': {
+          const [mysqlCols] = await connection.execute(`DESCRIBE ${tableName}`);
+          columns = mysqlCols.map(col => ({
+            name: col.Field,
+            type: col.Type,
+            nullable: col.Null === 'YES',
+            key: col.Key,
+            default: col.Default,
+          }));
+          break;
+        }
+        case 'postgres': {
+          const result = await connection.client.query(`
+            SELECT column_name, data_type, is_nullable, column_default
+            FROM information_schema.columns
+            WHERE table_name = $1
+            ORDER BY ordinal_position
+          `, [tableName]);
+          columns = result.rows.map(col => ({
+            name: col.column_name,
+            type: col.data_type,
+            nullable: col.is_nullable === 'YES',
+            default: col.column_default,
+          }));
+          break;
+        }
+        case 'sqlite': {
+          columns = await new Promise((resolve, reject) => {
+            connection.all(`PRAGMA table_info(${tableName})`, (err, rows) => {
+              if (err) reject(err);
+              else resolve(rows.map(col => ({
+                name: col.name,
+                type: col.type,
+                nullable: col.notnull === 0,
+                key: col.pk === 1 ? 'PRI' : '',
+                default: col.dflt_value,
+              })));
+            });
+          });
+          break;
+        }
+        case 'mssql': {
+          const result = await connection.query(`
+            SELECT COLUMN_NAME, DATA_TYPE, IS_NULLABLE, COLUMN_DEFAULT
+            FROM INFORMATION_SCHEMA.COLUMNS
+            WHERE TABLE_NAME = '${tableName}'
+            ORDER BY ORDINAL_POSITION
+          `);
+          columns = result.recordset.map(col => ({
+            name: col.COLUMN_NAME,
+            type: col.DATA_TYPE,
+            nullable: col.IS_NULLABLE === 'YES',
+            default: col.COLUMN_DEFAULT,
+          }));
+          break;
+        }
+      }
       
       return columns;
     } catch (error) {
@@ -245,7 +466,7 @@ class SQLService {
     }
   }
 
-  // Disconnect from MySQL database
+  // Disconnect from database
   async disconnect(connectionId) {
     try {
       const connectionData = this.connections.get(connectionId);
@@ -253,13 +474,31 @@ class SQLService {
         return { success: false, message: 'Connection not found' };
       }
 
-      const { connection } = connectionData;
+      const { connection, type } = connectionData;
       
-      // Close MySQL connection
-      await connection.end();
+      switch (type) {
+        case 'mysql':
+          await connection.end();
+          break;
+        case 'postgres':
+          connection.client.release();
+          await connection.pool.end();
+          break;
+        case 'sqlite':
+          await new Promise((resolve, reject) => {
+            connection.close((err) => {
+              if (err) reject(err);
+              else resolve();
+            });
+          });
+          break;
+        case 'mssql':
+          await connection.close();
+          break;
+      }
       
       this.connections.delete(connectionId);
-      console.log(`✅ SQLService: Disconnected MySQL connection`);
+      console.log(`✅ SQLService: Disconnected ${type.toUpperCase()} connection`);
       
       return { success: true, message: 'Disconnected successfully' };
     } catch (error) {
@@ -277,7 +516,7 @@ class SQLService {
 
     return {
       connectionId,
-      databaseType: 'mysql',
+      databaseType: connectionData.type,
       databaseName: connectionData.databaseName,
       connectedAt: connectionData.connectedAt,
       isConnected: true,
@@ -290,7 +529,7 @@ class SQLService {
     for (const [id, data] of this.connections) {
       connections.push({
         connectionId: id,
-        databaseType: 'mysql',
+        databaseType: data.type,
         databaseName: data.databaseName,
         connectedAt: data.connectedAt,
       });

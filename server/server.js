@@ -5,6 +5,7 @@ import { config } from 'dotenv';
 import { passport } from './config/passport.js';
 import authRoutes from './routes/authRoutes.js';
 import sqlRoutes from './routes/sql.routes.js';
+import mongodbRoutes from './routes/mongodb.routes.js';
 import dashboardRoutes from './routes/dashboardRoutes.js';
 
 // Load environment variables
@@ -16,7 +17,7 @@ const PORT = process.env.PORT || 3000;
 
 // Logging
 console.log('🔑 API Key loaded:', process.env.GEMINI_API_KEY ? 'Yes' : 'No');
-console.log('🚀 Starting DataSpeaks SQL Query API Server...');
+console.log('🚀 Starting DataSpeaks Multi-Database Query API Server...');
 
 // Middleware
 app.use(cors({
@@ -46,13 +47,15 @@ app.use(passport.session());
 app.get('/', (req, res) => {
   res.json({ 
     status: 'healthy', 
-    service: 'DataSpeaks SQL Query API',
-    version: '3.0.0',
+    service: 'DataSpeaks Multi-Database Query API',
+    version: '4.0.0',
     timestamp: new Date().toISOString(),
+    databases: ['SQL (MySQL, PostgreSQL, SQLite, SQL Server)', 'MongoDB'],
     endpoints: {
       health: '/',
       auth: '/api/auth',
       sql: '/api/sql',
+      mongodb: '/api/mongodb',
       dashboards: '/api/dashboards'
     }
   });
@@ -61,6 +64,7 @@ app.get('/', (req, res) => {
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/sql', sqlRoutes);
+app.use('/api/mongodb', mongodbRoutes);
 app.use('/api/dashboards', dashboardRoutes);
 
 // 404 Handler
@@ -68,7 +72,7 @@ app.use((req, res) => {
   res.status(404).json({
     error: 'Not Found',
     message: `Cannot ${req.method} ${req.path}`,
-    availableEndpoints: ['/api/auth', '/api/sql', '/api/dashboards']
+    availableEndpoints: ['/api/auth', '/api/sql', '/api/mongodb', '/api/dashboards']
   });
 });
 

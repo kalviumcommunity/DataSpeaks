@@ -16,6 +16,27 @@ const SQLConnectionPage = ({ onConnect }) => {
       example: 'mysql://username:password@localhost:3306/database',
       description: 'Most popular open-source database',
       icon: '🐬'
+    },
+    { 
+      id: 'postgres', 
+      name: 'PostgreSQL', 
+      example: 'postgresql://username:password@localhost:5432/database',
+      description: 'Advanced open-source database',
+      icon: '🐘'
+    },
+    { 
+      id: 'sqlite', 
+      name: 'SQLite', 
+      example: 'sqlite:///path/to/database.db',
+      description: 'Lightweight file-based database',
+      icon: '📁'
+    },
+    { 
+      id: 'mssql', 
+      name: 'SQL Server', 
+      example: 'Server=localhost;Database=mydb;User Id=sa;Password=yourpassword;',
+      description: 'Microsoft SQL Server',
+      icon: '🗄️'
     }
   ];
 
@@ -31,6 +52,42 @@ const SQLConnectionPage = ({ onConnect }) => {
         value: 'mysql://user:pass@192.168.1.100:3306/database',
         description: 'Connect to MySQL on another server'
       }
+    ],
+    postgres: [
+      {
+        label: 'Local PostgreSQL',
+        value: 'postgresql://postgres:password@localhost:5432/your_database',
+        description: 'Connect to PostgreSQL on your computer'
+      },
+      {
+        label: 'Remote PostgreSQL',
+        value: 'postgresql://user:pass@192.168.1.100:5432/database',
+        description: 'Connect to PostgreSQL on another server'
+      }
+    ],
+    sqlite: [
+      {
+        label: 'Local SQLite File',
+        value: 'sqlite:///home/user/mydata.db',
+        description: 'Connect to a local SQLite database file'
+      },
+      {
+        label: 'Relative Path',
+        value: 'sqlite://./database.db',
+        description: 'SQLite file in current directory'
+      }
+    ],
+    mssql: [
+      {
+        label: 'Local SQL Server',
+        value: 'Server=localhost;Database=mydb;User Id=sa;Password=yourpassword;',
+        description: 'Connect to SQL Server on your computer'
+      },
+      {
+        label: 'Windows Authentication',
+        value: 'Server=localhost;Database=mydb;Integrated Security=true;',
+        description: 'Use Windows authentication'
+      }
     ]
   };
 
@@ -38,6 +95,18 @@ const SQLConnectionPage = ({ onConnect }) => {
     mysql: [
       'mysql://root:password@localhost:3306/database_name',
       'mysql://user:pass@hostname:3306/db_name'
+    ],
+    postgres: [
+      'postgresql://postgres:password@localhost:5432/database_name',
+      'postgresql://user:pass@hostname:5432/db_name'
+    ],
+    sqlite: [
+      'sqlite:///path/to/database.db',
+      'sqlite://./mydata.db'
+    ],
+    mssql: [
+      'Server=localhost;Database=mydb;User Id=sa;Password=yourpass;',
+      'Server=192.168.1.100;Database=mydb;Integrated Security=true;'
     ]
   };
 
@@ -191,7 +260,11 @@ const SQLConnectionPage = ({ onConnect }) => {
                         : 'border-orange-200 hover:border-orange-300 text-gray-700 hover:bg-orange-50/50'
                     }`}
                   >
-                    <div className="font-medium">{db.name}</div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-2xl">{db.icon}</span>
+                      <div className="font-medium">{db.name}</div>
+                    </div>
+                    <p className="text-xs text-gray-600 mt-1">{db.description}</p>
                   </button>
                 ))}
               </div>
